@@ -1,0 +1,20 @@
+{
+  "name": "tjwave",
+  "version": "1.0.0",
+  "description": "Control the Servo arm on your TJ Bot!",
+  "main": "wave.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Victor Dibia",
+  "license": "ISC",
+  "dependencies": {
+    "mic": "^2.1.1",
+    "pigpio": "^0.4.0",
+    "node-aplay": "^1.0.3",
+    "rpi-ws281x-native": "^0.8.1",
+    "watson-developer-cloud": "^2.8.1",
+    "web-audio-api": "^0.2.2",
+    "which": "^1.2.11"
+  }
+}
