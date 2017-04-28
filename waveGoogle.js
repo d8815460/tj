@@ -17,6 +17,9 @@ get the system ready to run this code.
 In this step, the audio sample (pipe) is sent to "Watson Speech to Text" to transcribe.
 The service converts the audio to text and saves the returned text in "textStream"
 */
+var weatherxxx = require('weather');
+ 
+
 var pigpio = require('pigpio')
 pigpio.initialize();
 
@@ -179,11 +182,11 @@ function parseText(str){
   var containsWaveArm = (str.indexOf("搖") >= 0 || str.indexOf("挥") >= 0 || str.indexOf("动") >= 0 || str.indexOf("握") >= 0 ) && (  str.indexOf("手") >= 0) ;
   var introduceYourself = str.indexOf("介绍") >= 0 && str.indexOf("自我") >= 0  ;
   var weather  = str.indexOf("天气") >= 0  ;
-
+  var temp  = str.indexOf("温度") >= 0 || str.indexOf("气温") >= 0 || str.indexOf("冷") >= 0 || str.indexOf("热") >= 0;
   var whatisYourname = str.indexOf("什么") >= 0 && str.indexOf("叫") >= 0 && str.indexOf("名字") >= 0  ;
   var canYouDance = (str.indexOf("会") >= 0 || str.indexOf("你") >= 0) && str.indexOf("跳舞") >= 0  ;
   var canYouDo = (str.indexOf("会") >= 0 || str.indexOf("你") >= 0) && str.indexOf("做什么") >= 0  ;
-  var turnOn = str.indexOf("冷") >= 0 || str.indexOf("笑话") >= 0 ;
+  var turnOn =  str.indexOf("笑话") >= 0 ;
   var turnOff = str.indexOf("不知道") >= 0 || str.indexOf("猜不") >= 0 ; 
   var splink = str.indexOf("闪烁") >= 0 || str.indexOf("算数") >= 0 ;
    var greetings = str.indexOf("你好") >= 0 || str.indexOf("您好") >= 0 || str.indexOf("是谁") >= 0 ;
@@ -196,8 +199,8 @@ function parseText(str){
     waveArm("wave") ;
   }else if (introduceYourself){
     play_or_tts_ch(" 哈嘍，我是TJ。我是個開源機器人哦，IBM希望用有趣的方式來引導各位使用Watson的服務。你可以用3D列印或是雷射切割來擁有我,然後設計或套用各式各樣的特色功能給我唷。我真的等不及要看看你能把我進化成什麼樣子了！");
-  }else if (fju){
-    play_or_tts_ch(" 天大地大辅仁最大");
+  }else if (temp){
+	temp_query();
  }else if (weather){
     play_or_tts_ch("今天天气很好适合爬山");
 
@@ -457,3 +460,47 @@ process.on('SIGINT', function () {
   pigpio.terminate();
   process.nextTick(function () { process.exit(0); });
 });
+
+
+function temp_query(){
+	weatherxxx({location: 'New Taipei City'}, function(data) {
+   if (data.temp > 30) {
+      play_or_tts_ch("现在的温度是" + data.temp + "度，宝宝快要融化了");
+	  launchLED1();
+   }else{
+	  play_or_tts_ch("现在的温度是" + data.temp + "度，宝宝快要冻僵了");
+	  launchLED2();
+   }
+ });
+	
+}
+
+
+function launchLED1(){	
+	var Gpio = pigpio.Gpio;
+	var led = new Gpio(18, {mode: Gpio.OUTPUT}),
+        dutyCycle = 255;
+		led.pwmWrite(dutyCycle);
+			setTimeout(function(){
+				led.pwmWrite(0);
+				if (dutyCycle > 255) {
+				dutyCycle = 0;
+				}
+			}, 10000); 
+}
+
+function launchLED2(){	
+
+		var Gpio = pigpio.Gpio;
+		  led = new Gpio(18, {mode: Gpio.OUTPUT}),
+		  dutyCycle = 0;
+
+		setInterval(function () {
+		  led.pwmWrite(dutyCycle);
+			
+		  dutyCycle += 5;
+		  if (dutyCycle > 255) {
+			dutyCycle = 0;
+		  }
+		}, 20);
+}
